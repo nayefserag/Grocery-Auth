@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsEmail, IsUUID } from 'class-validator';
+import { IsString, IsNotEmpty, IsEmail, IsUUID, IsBoolean } from 'class-validator';
 
 export class SignupDto {
   @IsUUID()
@@ -24,4 +24,11 @@ export class SignupDto {
   @IsEmail()
   @IsNotEmpty()
   email: string;
+
+  @IsString()
+  @IsNotEmpty()
+  phone: string;
+
+  @IsBoolean()
+  isDeleted: string;
 }
