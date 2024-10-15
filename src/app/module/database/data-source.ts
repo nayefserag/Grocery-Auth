@@ -13,6 +13,7 @@ export const dataSourceOptions: DataSourceOptions = {
   entities: ['dist/**/*.entity.js'],
   synchronize: config.getString('DATABASE_SYNCHRONIZE') === 'true',
   logging: config.getString('DATABASE_LOGGING') === 'true',
+  driver: require('mysql2'),
 };
 
 const dataSource = new DataSource(dataSourceOptions);
