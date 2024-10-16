@@ -1,6 +1,6 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { config } from 'src/app/shared/module/config-module/config-module.service';
+import { config } from 'src/app/shared/module/config-module/config.service';
 
 @Injectable()
 export class TokenService {

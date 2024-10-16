@@ -1,4 +1,3 @@
-import { Winston } from './../../../../node_modules/consola/types/consola.d';
 import { Module } from '@nestjs/common';
 import { DatabaseModule } from '../database/database.module';
 import { TypeOrmModule } from '@nestjs/typeorm';

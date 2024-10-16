@@ -15,7 +15,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { AuthRepository } from 'src/app/module/infrastructure/repositories/auth/auth.repository';
 import { TokenService } from 'src/app/module/strategies/jwt.service';
 import { LoginDto } from '../model/login.dto';
-import { config } from 'src/app/shared/module/config-module/config-module.service';
+import { config } from 'src/app/shared/module/config-module/config.service';
 import { ResetPasswordDto } from '../model/reser-password.dto';
 
 @Injectable()

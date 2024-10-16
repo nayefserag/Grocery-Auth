@@ -1,6 +1,6 @@
 import * as querystring from 'querystring';
 
-import { config } from 'src/app/shared/module/config-module/config-module.service';
+import { config } from 'src/app/shared/module/config-module/config.service';
 
 export class Connector {
   public static getConnectionUrl(): string {

@@ -1,4 +1,4 @@
-import { config } from 'src/app/shared/module/config-module/config-module.service';
+import { config } from 'src/app/shared/module/config-module/config.service';
 import { DataSource, DataSourceOptions } from 'typeorm';
 
 export const dataSourceOptions: DataSourceOptions = {
