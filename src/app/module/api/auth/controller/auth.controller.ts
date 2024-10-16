@@ -7,8 +7,8 @@ import {
   Request,
 } from '@nestjs/common';
 import { LoginDto } from 'src/app/module/application/auth/model/login.dto';
-import { ResetPasswordDto } from 'src/app/module/application/auth/model/reser-password.dto';
-import { SignupDto } from 'src/app/module/application/auth/model/sginup.dto';
+import { ResetPasswordDto } from 'src/app/module/application/auth/model/reset-password.dto';
+import { SignupDto } from 'src/app/module/application/auth/model/signup.dto';
 import { AuthService } from 'src/app/module/application/auth/services/auth.service';
 import { JwtAuthGuard } from 'src/app/module/strategies/jwt.guard';
 

@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigService } from 'src/app/shared/module/config-module/config.service';
-import { HttpModule } from '@nestjs/axios';
+import { HttpModule, HttpService } from '@nestjs/axios';
 import { ConfigModule } from '@nestjs/config'
 import { NotificationCommunicator } from './notification.communicator';
 @Module({
@@ -9,9 +9,7 @@ import { NotificationCommunicator } from './notification.communicator';
     ConfigModule.forRoot(),
     // // MongooseModule.forFeature([{ name: Booking.name, schema: BookingSchema }]),
   ],
-
-  controllers: [],
-
-  providers: [NotificationCommunicator, ConfigService, ],
+  exports: [NotificationCommunicator],
+  providers: [NotificationCommunicator, ConfigService ],
 })
 export class NotificationCommunicatorModule {}

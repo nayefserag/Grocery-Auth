@@ -27,7 +27,7 @@ async function bootstrap() {
         url: Connector.getConnectionUrl(),
         prefetchCount: config.getNumber('RABBITMQ_PREFETCH_COUNT'),
         queue: {
-          name: config.getString('RABBITMQ_CAR_BOOKING_CANCEL_QUEUE'),
+          name: config.getString('NOTIFICATION_FORGET_PASSWORD_EMAIL_QUEUE'),
         },
       },
       app.get(NotificationCommunicator),

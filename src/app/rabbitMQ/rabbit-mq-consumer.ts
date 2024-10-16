@@ -46,7 +46,7 @@ export class RabbitMQConsumer extends ServerRMQ {
     try {
       const queuename = this.consumerOptions.queue.name;
       const cancelQueueName = config.getString(
-        'RABBITMQ_CAR_BOOKING_CANCEL_QUEUE',
+        'NOTIFICATION_FORGET_PASSWORD_EMAIL_QUEUE',
       );
       const skip = queuename == cancelQueueName;
       const content = JSON.parse(message.content.toString('utf-8'));
