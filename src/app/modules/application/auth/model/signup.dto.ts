@@ -1,8 +1,7 @@
-import { IsString, IsNotEmpty, IsEmail, IsUUID, IsBoolean } from 'class-validator';
+import { IsString, IsNotEmpty, IsEmail, IsUUID, IsBoolean, IsOptional } from 'class-validator';
 
 export class SignupDto {
-  @IsUUID()
-  @IsNotEmpty()
+
   id: string;
 
   @IsString()
@@ -30,5 +29,10 @@ export class SignupDto {
   phone: string;
 
   @IsBoolean()
-  isDeleted: string;
+  @IsOptional()
+  isDeleted: boolean;
+
+  @IsBoolean()
+  @IsOptional()
+  isActive: boolean ;
 }

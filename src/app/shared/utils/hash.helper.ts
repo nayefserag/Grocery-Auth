@@ -8,7 +8,8 @@ import { config } from '../module/config-module/config.service';
  */
 export const hashPassword = async (password: string): Promise<string> => {
   const salt = await bcrypt.genSalt(config.getNumber('SALT_ROUNDS'));
-  return bcrypt.hash(password, salt);
+  const hashedPassword = await bcrypt.hash(password, salt);
+  return hashedPassword;
 };
 
 /**

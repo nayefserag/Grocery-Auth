@@ -24,6 +24,8 @@ export class UserEntity {
     phone: string;
 
     @Column({name: 'is_Deleted',type: 'varchar', length: 255, nullable: true})
-    isDeleted: string;
-
+    isDeleted: boolean;
+    
+    @Column({ name: 'is_active', type: 'boolean', default: true })
+    isActive: boolean;
 }

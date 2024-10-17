@@ -11,13 +11,15 @@ import {
   hashPassword,
 } from 'src/app/shared/utils/hash.helper';
 import { v4 as uuidv4 } from 'uuid';
-import { AuthRepository } from 'src/app/module/infrastructure/repositories/auth/auth.repository';
-import { TokenService } from 'src/app/module/strategies/jwt.service';
+import { AuthRepository } from 'src/app/modules/infrastructure/repositories/auth/auth.repository';
+import { TokenService } from 'src/app/modules/strategies/jwt.service';
 import { LoginDto } from '../model/login.dto';
 import { config } from 'src/app/shared/module/config-module/config.service';
-import { NotificationCommunicator } from 'src/app/module/infrastructure/communicator/notification.communicator';
+import { NotificationCommunicator } from 'src/app/modules/infrastructure/communicator/notification.communicator';
 import { ResetPasswordDto } from '../model/reset-password.dto';
 import { SignupDto } from '../model/signup.dto';
+import { TokenDto } from '../model/token.dto';
+
 
 @Injectable()
 export class AuthService {
@@ -37,17 +39,17 @@ export class AuthService {
 
     const existedUser = await this.authRepository.getUserByFelid(
       'username',
-      user.username,
+      signUpDto.username,
     );
-
     if (existedUser) {
       this.logger.warn(
-        `Signup failed: User already exists (username: ${user.username})`,
+        `Signup failed: User already exists (username: ${signUpDto.username})`,
       );
       throw new ConflictException('User already exists');
     }
 
     user.password = await hashPassword(user.password);
+
     const userEntity = await this.authRepository.createUser(user);
 
     this.logger.log(`User created successfully: ${user.username}`);
@@ -63,11 +65,11 @@ export class AuthService {
     };
   }
 
-  async login(loginDto: LoginDto) {
-    this.logger.log(`Login attempt for username: ${loginDto.username}`);
+  async login(loginDto: LoginDto): Promise<Partial<TokenDto>> {
+    this.logger.log(`Login attempt for username: ${loginDto.email}`);
     const entity = await this.authRepository.getUserByFelid(
-      'username',
-      loginDto.username,
+      'email',
+      loginDto.email,
     );
 
     if (
@@ -75,24 +77,24 @@ export class AuthService {
       !(await comparePassword(loginDto.password, entity.password))
     ) {
       this.logger.warn(
-        `Login failed: Invalid credentials for username: ${loginDto.username}`,
+        `Login failed: Invalid credentials for email: ${loginDto.email}`,
       );
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    this.logger.log(`Login successful for username: ${loginDto.username}`);
+    this.logger.log(`Login successful for email: ${loginDto.email}`);
     const payload = { username: entity.username, userId: entity.id };
     const access_token = this.jwtService.generateAccessToken(payload);
     const refresh_token = this.jwtService.generateRefreshToken(payload);
 
-    this.logger.log(`Tokens generated for username: ${loginDto.username}`);
+    this.logger.log(`Tokens generated for email: ${loginDto.email}`);
     return {
       access_token,
       refresh_token,
     };
   }
 
-  async refreshAccessToken(refreshToken: string) {
+  async refreshAccessToken(refreshToken: string): Promise<Partial<TokenDto>> {
     this.logger.log('Refreshing access token');
     try {
       const payload = this.jwtService.refreshToken(refreshToken);
@@ -106,7 +108,7 @@ export class AuthService {
     }
   }
 
-  async forgotPassword(email: string) {
+  async forgotPassword(email: string) :Promise<void> {
     this.logger.log(`Password reset requested for email: ${email}`);
     const user = await this.authRepository.getUserByFelid('email', email);
 
@@ -125,7 +127,6 @@ export class AuthService {
     await this.notificationCommunicator.sendEmail({ email, resetToken });
 
     this.logger.log(`Password reset link sent to email: ${email}`);
-    return { message: 'Password reset link has been sent to your email' };
   }
 
   async resetPassword(resetPasswordDto: ResetPasswordDto) {
@@ -158,5 +159,54 @@ export class AuthService {
       );
       throw new BadRequestException('Invalid or expired token');
     }
+  }
+
+  async deleteAccount(userId: string): Promise<void> {
+    this.logger.log(`Deleting account for userId: ${userId}`);
+    const user = await this.authRepository.getUserByFelid('id', userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    await this.authRepository.deleteUser(userId);
+    this.logger.log(`User account deleted: ${user.username}`);
+  }
+
+  async deactivateAccount(userId: string): Promise<void> {
+    this.logger.log(`Deactivating account for userId: ${userId}`);
+    const user = await this.authRepository.getUserByFelid('id', userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    user.isActive = false;
+    await this.authRepository.updateUser(user);
+    this.logger.log(`User account deactivated: ${user.username}`);
+  }
+
+  async reactivateAccount(userId: string): Promise<void> {
+    this.logger.log(`Reactivating account for userId: ${userId}`);
+    const user = await this.authRepository.getUserByFelid('id', userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    if (user.isDeleted) {
+      throw new BadRequestException('Account is deleted, cannot reactivate');
+    }
+
+    user.isActive = true;
+    await this.authRepository.updateUser(user);
+    this.logger.log(`User account reactivated: ${user.username}`);
+  }
+
+  async updateProfile(userId: string, body: Partial<SignupDto>): Promise<void> {
+    this.logger.log(`Updating profile for userId: ${userId}`);
+    const user = await this.authRepository.getUserByFelid('id', userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    Object.assign(user, body);
+    await this.authRepository.updateUser(user);
+    this.logger.log(`User profile updated: ${user.username}`);
   }
 }

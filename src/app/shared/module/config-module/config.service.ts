@@ -62,7 +62,7 @@ export class ConfigService {
       // JWT and security-related environment variables
       JWT_SECRET: Joi.string().required(),
       JWT_SECRET_REFRESH: Joi.string().required(),
-      SALT_ROUNDS: Joi.number().default(1000),
+      SALT_ROUNDS: Joi.number().default(10),
       RESET_PASSWORD_SECRET: Joi.string().required(),
     });
 

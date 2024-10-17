@@ -2,7 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe, VersioningType, Logger } from '@nestjs/common';
 import { config } from './app/shared/module/config-module/config.service';
-import { NotificationCommunicator } from './app/module/infrastructure/communicator/notification.communicator';
+import { NotificationCommunicator } from './app/modules/infrastructure/communicator/notification.communicator';
 import { Connector } from './app/rabbitMQ/connector';
 import { RabbitMQConsumer } from './app/rabbitMQ/rabbit-mq-consumer';
 async function bootstrap() {

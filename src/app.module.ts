@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
-import { AuthModule } from './app/module/api/auth/auth.module';
-import { NotificationCommunicatorModule } from './app/module/infrastructure/communicator/communicator.module';
+import { AuthModule } from './app/modules/api/auth/auth.module';
+import { NotificationCommunicatorModule } from './app/modules/infrastructure/communicator/communicator.module';
 
 @Module({
   imports: [AuthModule, NotificationCommunicatorModule],

@@ -3,7 +3,7 @@ import { ServerRMQ } from '@nestjs/microservices';
 import { RQM_DEFAULT_IS_GLOBAL_PREFETCH_COUNT } from '@nestjs/microservices/constants';
 import { Channel, Message } from 'amqplib';
 import { ConsumerOptions } from './consumer-options';
-import { NotificationCommunicator } from '../module/infrastructure/communicator/notification.communicator';
+import { NotificationCommunicator } from '../modules/infrastructure/communicator/notification.communicator';
 import { config } from '../shared/module/config-module/config.service';
 @Injectable()
 export class RabbitMQConsumer extends ServerRMQ {

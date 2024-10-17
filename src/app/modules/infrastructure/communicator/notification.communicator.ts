@@ -13,13 +13,13 @@ export class NotificationCommunicator {
   ) {}
 
   public async sendEmail(forgetPasswordDto: any) {
-    const url = `${this.configService.getString('NOTIFICATION_SERVICE_URL')}/user-emails/send-forget-password-email`;
+    const url = `${this.configService.getString('NOTIFICATION_SERVICE_URL')}/user-emails/send-forgot-password-email`;
 
     this.logger.log(`Calling Notification Service: ${url}`);
 
     return await firstValueFrom(
       this.httpService
-        .get(url, forgetPasswordDto)
+        .post(url, forgetPasswordDto)
         .pipe(
           map((res) => {
             return res.data;
