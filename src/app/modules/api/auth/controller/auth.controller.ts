@@ -15,7 +15,7 @@ import { LoginDto } from 'src/app/modules/application/auth/model/login.dto';
 import { ResetPasswordDto } from 'src/app/modules/application/auth/model/reset-password.dto';
 import { SignupDto } from 'src/app/modules/application/auth/model/signup.dto';
 import { AuthService } from 'src/app/modules/application/auth/services/auth.service';
-import { JwtAuthGuard } from 'src/app/modules/strategies/jwt.guard';
+import { JwtAuthGuard } from 'src/app/modules/strategies/jwt/jwt.guard';
 
 @Controller('auth')
 export class AuthController {

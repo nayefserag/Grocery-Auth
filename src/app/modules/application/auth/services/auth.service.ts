@@ -12,14 +12,13 @@ import {
 } from 'src/app/shared/utils/hash.helper';
 import { v4 as uuidv4 } from 'uuid';
 import { AuthRepository } from 'src/app/modules/infrastructure/repositories/auth/auth.repository';
-import { TokenService } from 'src/app/modules/strategies/jwt.service';
+import { TokenService } from 'src/app/modules/strategies/jwt/jwt.service';
 import { LoginDto } from '../model/login.dto';
 import { config } from 'src/app/shared/module/config-module/config.service';
 import { NotificationCommunicator } from 'src/app/modules/infrastructure/communicator/notification.communicator';
 import { ResetPasswordDto } from '../model/reset-password.dto';
 import { SignupDto } from '../model/signup.dto';
 import { TokenDto } from '../model/token.dto';
-
 
 @Injectable()
 export class AuthService {
@@ -108,7 +107,7 @@ export class AuthService {
     }
   }
 
-  async forgotPassword(email: string) :Promise<void> {
+  async forgotPassword(email: string): Promise<void> {
     this.logger.log(`Password reset requested for email: ${email}`);
     const user = await this.authRepository.getUserByFelid('email', email);
 

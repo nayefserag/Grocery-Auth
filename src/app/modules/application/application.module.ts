@@ -1,11 +1,14 @@
 import { Module } from "@nestjs/common";
-import { AuthRepository } from "../infrastructure/repositories/auth/auth.repository";
 import { AuthModule } from "../api/auth/auth.module";
+import { GitHubStrategy } from "../strategies/github/github.strategy";
+import { GoogleStrategy } from "../strategies/gmail/google.stratgy";
+import { ApiModule } from "../api/api.module";
+import { ConfigService } from "@nestjs/config";
 
 @Module({
-    imports: [AuthModule],
+    imports: [ApiModule],
     controllers: [],
-    providers: [],
+    providers: [GoogleStrategy, GitHubStrategy,ConfigService],
     exports: [],
 })
 export class ApplicationModule { }
