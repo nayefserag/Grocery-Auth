@@ -9,15 +9,13 @@ export class XController {
   @Get()
   @UseGuards(AuthGuard('twitter'))
   async twitterLogin() {
-    // This route will redirect the user to Twitter for authentication
   }
 
-  // Callback after Twitter authentication
   @Get('callback')
   @UseGuards(AuthGuard('twitter'))
   async twitterLoginCallback(@Req() req) {
     let entity: OAuthDto = req.user;
-    entity.provider = 'github';
+    entity.provider = 'x';
     entity.accessToken = req.user.accessToken;
     return await this.oAuthService.authenticate(entity);
   }

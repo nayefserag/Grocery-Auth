@@ -9,14 +9,13 @@ export class LinkedInController {
   @Get()
   @UseGuards(AuthGuard('linkedin'))
   async linkedinAuth() {
-    // This initiates LinkedIn OAuth flow
   }
 
   @Get('callback')
   @UseGuards(AuthGuard('linkedin'))
   async linkedinAuthRedirect(@Req() req) {
     let entity: OAuthDto = req.user;
-    entity.provider = 'github';
+    entity.provider = 'linkedin';
     entity.accessToken = req.user.accessToken;
     return await this.oAuthService.authenticate(entity);
   }
