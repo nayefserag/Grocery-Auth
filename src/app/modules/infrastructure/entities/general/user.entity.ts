@@ -26,6 +26,18 @@ export class UserEntity {
     @Column({name: 'is_Deleted',type: 'varchar', length: 255, nullable: true})
     isDeleted: boolean;
     
-    @Column({ name: 'is_active', type: 'boolean', default: true })
+    @Column({ name: 'is_active', type: 'boolean'})
     isActive: boolean;
+
+    @Column({name: 'strategy_key',type: 'varchar', length: 255, nullable: true})
+    strategyKey: string;
+
+    @Column({name: 'refresh_token',type: 'varchar', length: 255, nullable: true})
+    refreshToken: string;
+
+    @Column({name: 'is_completed',type: 'boolean'})
+    isCompleted: boolean;
+
+    @Column({name: 'provider',type: 'varchar', length: 255, nullable: true})
+    provider: string;
 }

@@ -10,6 +10,7 @@ import {
   HttpCode,
   Delete,
   Patch,
+  Param,
 } from '@nestjs/common';
 import { LoginDto } from 'src/app/modules/application/auth/model/login.dto';
 import { ResetPasswordDto } from 'src/app/modules/application/auth/model/reset-password.dto';
@@ -43,7 +44,7 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Patch('profile')
   @HttpCode(HttpStatus.OK)
-  async updateProfile(@Request() req, @Body() body : Partial<SignupDto>) {
+  async updateProfile(@Request() req, @Body() body : SignupDto) {
     return this.authService.updateProfile(req.user.userId, body);
   }
 
@@ -91,5 +92,12 @@ export class AuthController {
   async deleteAccount(@Request() req) {
     await this.authService.deleteAccount(req.user.userId);
     return { message: 'Account deleted successfully' };
+  }
+
+  
+  @Post('complete-registration/:id')
+  @HttpCode(HttpStatus.OK)
+  async completeRegistration(@Body() body : SignupDto, @Param('id') id: string) {
+    return this.authService.updateProfile(body.id, body);
   }
 }

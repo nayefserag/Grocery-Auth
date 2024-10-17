@@ -17,6 +17,7 @@ import { TokenService } from '../strategies/jwt/jwt.service';
 import { JwtService } from '@nestjs/jwt';
 import { LinkedInController } from './social-auth/controller/linkedin.controller';
 import { XController } from './social-auth/controller/x.controller';
+import { OAuthService } from '../application/social-auth/gmail/services/OAuth.service';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { XController } from './social-auth/controller/x.controller';
   ],
   providers: [
     AuthModule,
+    OAuthService,
     AuthRepository,
     SocialLoginModule,
     NotificationCommunicator,

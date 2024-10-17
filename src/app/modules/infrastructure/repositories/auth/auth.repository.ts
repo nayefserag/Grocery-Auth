@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from '../../entities/general/user.entity';
 import { Repository } from 'typeorm';
 import { SignupDto } from 'src/app/modules/application/auth/model/signup.dto';
+import { OAuthDto } from 'src/app/modules/application/auth/model/o-auth.dto';
 
 @Injectable()
 export class AuthRepository {
@@ -13,7 +14,7 @@ export class AuthRepository {
     let logger = new Logger();
     logger.log('AuthRepository created', AuthRepository.name);
   }
-  async createUser(user: SignupDto) {
+  async createUser(user: SignupDto | OAuthDto) {
     try {
       let entity = this.userRepository.create(user);
       entity = await this.userRepository.save(entity);

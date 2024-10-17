@@ -52,7 +52,7 @@ export class AuthService {
     const userEntity = await this.authRepository.createUser(user);
 
     this.logger.log(`User created successfully: ${user.username}`);
-    const payload = { username: user.username, userId: user.id };
+    const payload = { userId: user.id };
     const access_token = this.jwtService.generateAccessToken(payload);
     const refresh_token = this.jwtService.generateRefreshToken(payload);
 
@@ -82,7 +82,7 @@ export class AuthService {
     }
 
     this.logger.log(`Login successful for email: ${loginDto.email}`);
-    const payload = { username: entity.username, userId: entity.id };
+    const payload = { userId: entity.id };
     const access_token = this.jwtService.generateAccessToken(payload);
     const refresh_token = this.jwtService.generateRefreshToken(payload);
 
@@ -99,7 +99,7 @@ export class AuthService {
       const payload = this.jwtService.refreshToken(refreshToken);
       const newAccessToken = this.jwtService.generateAccessToken(payload);
 
-      this.logger.log(`Access token refreshed for user: ${payload.username}`);
+      this.logger.log(`Access token refreshed for userId: ${payload.userId}`);
       return { access_token: newAccessToken };
     } catch (error) {
       this.logger.error('Failed to refresh access token', error.stack);
@@ -123,7 +123,7 @@ export class AuthService {
       userId: user.id,
     });
 
-    await this.notificationCommunicator.sendEmail({ email, resetToken });
+    await this.notificationCommunicator.sendForgotPasswordEmail({ email, resetToken });
 
     this.logger.log(`Password reset link sent to email: ${email}`);
   }
@@ -198,7 +198,7 @@ export class AuthService {
     this.logger.log(`User account reactivated: ${user.username}`);
   }
 
-  async updateProfile(userId: string, body: Partial<SignupDto>): Promise<void> {
+  async updateProfile(userId: string, body: SignupDto): Promise<void> {
     this.logger.log(`Updating profile for userId: ${userId}`);
     const user = await this.authRepository.getUserByFelid('id', userId);
     if (!user) {
