@@ -1,9 +1,11 @@
 import { Controller, Get, Req, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { OAuthDto } from 'src/app/modules/application/auth/model/o-auth.dto';
+import { OAuthService } from 'src/app/modules/application/social-auth/gmail/services/OAuth.service';
 
 @Controller('twitter')
 export class XController {
-  // Route to start Twitter login
+  constructor(private readonly oAuthService: OAuthService) {}
   @Get()
   @UseGuards(AuthGuard('twitter'))
   async twitterLogin() {
@@ -13,9 +15,10 @@ export class XController {
   // Callback after Twitter authentication
   @Get('callback')
   @UseGuards(AuthGuard('twitter'))
-  twitterLoginCallback(@Req() req) {
-    // Twitter authentication complete, Twitter will redirect to this URL.
-    // req.user will contain the authenticated user's profile information
-    return req.user;
+  async twitterLoginCallback(@Req() req) {
+    let entity: OAuthDto = req.user;
+    entity.provider = 'github';
+    entity.accessToken = req.user.accessToken;
+    return await this.oAuthService.authenticate(entity);
   }
 }
