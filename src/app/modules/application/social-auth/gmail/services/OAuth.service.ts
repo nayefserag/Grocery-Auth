@@ -27,9 +27,6 @@ export class OAuthService {
       user.id = uuidv4();
       let newUser = await this.authRepository.createUser(user);
       await this.notificationCommunicator.sendCompleteRegistrationEmail({ email:newUser.email, id: newUser.id });
-
-      // here we will send email to complete registration throw notification service
-      // the link which will send its the to this service that called complete data
       return {
         message: 'GitHub Authentication Successful And we have sent you a mail to complete your registration',
         user: newUser,

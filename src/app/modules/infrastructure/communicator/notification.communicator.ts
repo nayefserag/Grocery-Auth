@@ -14,18 +14,19 @@ export class NotificationCommunicator {
     private readonly httpService: HttpService,
   ) {}
 
-  public async sendForgotPasswordEmail(forgetPasswordDto: ForgotPasswordDto) {
-    const url = `${this.configService.getString('NOTIFICATION_SERVICE_URL')}/user-emails/send-forgot-password-email`;
+  private async sendEmail(
+    emailType: 'forgotPassword' | 'completeRegistration',
+    dto: ForgotPasswordDto | CompleteUserDto
+  ) {
+    const url = `${this.configService.getString('NOTIFICATION_SERVICE_URL')}/user-emails/send-email`;
 
-    this.logger.log(`Calling Notification Service: ${url}`);
+    this.logger.log(`Calling Notification Service: ${url} with email type: ${emailType}`);
 
     return await firstValueFrom(
       this.httpService
-        .post(url, forgetPasswordDto)
+        .post(url, { emailType, dto })
         .pipe(
-          map((res) => {
-            return res.data;
-          }),
+          map((res) => res.data),
           catchError((error) => {
             this.logger.error(
               `Error from Notification Service: ${JSON.stringify(error.response?.data)}`,
@@ -36,25 +37,11 @@ export class NotificationCommunicator {
     );
   }
 
+  public async sendForgotPasswordEmail(forgetPasswordDto: ForgotPasswordDto) {
+    return this.sendEmail('forgotPassword', forgetPasswordDto);
+  }
+
   public async sendCompleteRegistrationEmail(completeUserDto: CompleteUserDto) {
-    const url = `${this.configService.getString('NOTIFICATION_SERVICE_URL')}/user-emails/send-complete-registration-email`;
-
-    this.logger.log(`Calling Notification Service: ${url}`);
-
-    return await firstValueFrom(
-      this.httpService
-        .post(url, completeUserDto)
-        .pipe(
-          map((res) => {
-            return res.data;
-          }),
-          catchError((error) => {
-            this.logger.error(
-              `Error from Notification Service: ${JSON.stringify(error.response?.data)}`,
-            );
-            throw new UnauthorizedException(error.response?.data);
-          }),
-        ),
-    );
+    return this.sendEmail('completeRegistration', completeUserDto);
   }
 }
