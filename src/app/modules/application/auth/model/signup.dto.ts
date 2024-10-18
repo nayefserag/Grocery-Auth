@@ -35,4 +35,16 @@ export class SignupDto {
   @IsBoolean()
   @IsOptional()
   isActive: boolean ;
+
+  @IsOptional()
+  refreshToken: string;
+
+  @IsOptional()
+  strategyKey: string;
+
+  @IsOptional()
+  isCompleted: boolean
+
+  @IsOptional()
+  provider: string;
 }

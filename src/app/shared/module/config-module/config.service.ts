@@ -39,7 +39,6 @@ export class ConfigService {
   // Validate the environment variables using Joi
   private validateInput(env: EnvConfig): EnvConfig {
     const envVarsSchema: Joi.ObjectSchema = Joi.object({
-
       PORT: Joi.number().default(5000),
 
       // Database-related environment variables
@@ -58,12 +57,34 @@ export class ConfigService {
       RABBITMQ_1_PASSWORD: Joi.string().required(),
       RABBITMQ_1_VHOST: Joi.string().default('/'),
       RABBITMQ_1_HEART_BEAT: Joi.number().default(15),
+      RABBITMQ_PREFETCH_COUNT: Joi.number().default(10),
+
+      // Notification service-related environment variables
+      NOTIFICATION_FORGET_PASSWORD_EMAIL_QUEUE: Joi.string().required(),
+      NOTIFICATION_SERVICE_URL: Joi.string().uri().required(),
 
       // JWT and security-related environment variables
       JWT_SECRET: Joi.string().required(),
       JWT_SECRET_REFRESH: Joi.string().required(),
       SALT_ROUNDS: Joi.number().default(10),
       RESET_PASSWORD_SECRET: Joi.string().required(),
+
+      // OAuth related environment variables
+      GOOGLE_CLIENT_ID: Joi.string().required(),
+      GOOGLE_CLIENT_SECRET: Joi.string().required(),
+      GOOGLE_CALLBACK_URL: Joi.string().uri().required(),
+
+      GITHUB_CLIENT_ID: Joi.string().required(),
+      GITHUB_CLIENT_SECRET: Joi.string().required(),
+      GITHUB_CALLBACK_URL: Joi.string().uri().required(),
+
+      LINKEDIN_CLIENT_ID: Joi.string().required(),
+      LINKEDIN_CLIENT_SECRET: Joi.string().required(),
+      LINKEDIN_CALLBACK_URL: Joi.string().uri().required(),
+
+      TWITTER_CONSUMER_KEY: Joi.string().required(),
+      TWITTER_CONSUMER_SECRET: Joi.string().required(),
+      TWITTER_CALLBACK_URL: Joi.string().uri().required(),
     });
 
     const { error, value: validatedEnvConfig } = envVarsSchema.validate(env, {
@@ -76,7 +97,6 @@ export class ConfigService {
     return validatedEnvConfig;
   }
 }
-
 
 const config = ConfigService.getInstance();
 export { config };

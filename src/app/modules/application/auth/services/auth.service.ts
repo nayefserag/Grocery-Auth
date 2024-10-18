@@ -12,14 +12,13 @@ import {
 } from 'src/app/shared/utils/hash.helper';
 import { v4 as uuidv4 } from 'uuid';
 import { AuthRepository } from 'src/app/modules/infrastructure/repositories/auth/auth.repository';
-import { TokenService } from 'src/app/modules/strategies/jwt.service';
+import { TokenService } from 'src/app/modules/strategies/jwt/jwt.service';
 import { LoginDto } from '../model/login.dto';
 import { config } from 'src/app/shared/module/config-module/config.service';
 import { NotificationCommunicator } from 'src/app/modules/infrastructure/communicator/notification.communicator';
 import { ResetPasswordDto } from '../model/reset-password.dto';
 import { SignupDto } from '../model/signup.dto';
 import { TokenDto } from '../model/token.dto';
-
 
 @Injectable()
 export class AuthService {
@@ -35,25 +34,28 @@ export class AuthService {
 
   async signup(signUpDto: SignupDto) {
     this.logger.log(`Signup attempt for username: ${signUpDto.username}`);
-    const user = { id: uuidv4(), ...signUpDto };
 
     const existedUser = await this.authRepository.getUserByFelid(
       'username',
       signUpDto.username,
     );
+
     if (existedUser) {
       this.logger.warn(
-        `Signup failed: User already exists (username: ${signUpDto.username})`,
+        `Signup failed: User with username ${signUpDto.username} already exists.`,
       );
       throw new ConflictException('User already exists');
     }
 
+    const user = { id: uuidv4(), ...signUpDto };
     user.password = await hashPassword(user.password);
 
     const userEntity = await this.authRepository.createUser(user);
+    this.logger.log(
+      `User created successfully: ${user.username} (ID: ${user.id})`,
+    );
 
-    this.logger.log(`User created successfully: ${user.username}`);
-    const payload = { username: user.username, userId: user.id };
+    const payload = { userId: user.id };
     const access_token = this.jwtService.generateAccessToken(payload);
     const refresh_token = this.jwtService.generateRefreshToken(payload);
 
@@ -66,41 +68,50 @@ export class AuthService {
   }
 
   async login(loginDto: LoginDto): Promise<Partial<TokenDto>> {
-    this.logger.log(`Login attempt for username: ${loginDto.email}`);
+    this.logger.log(`Login attempt for email: ${loginDto.email}`);
+
     const entity = await this.authRepository.getUserByFelid(
       'email',
       loginDto.email,
     );
-
-    if (
-      !entity ||
-      !(await comparePassword(loginDto.password, entity.password))
-    ) {
+    if (!entity) {
       this.logger.warn(
-        `Login failed: Invalid credentials for email: ${loginDto.email}`,
+        `Login failed: No user found with email ${loginDto.email}`,
+      );
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    const isPasswordValid = await comparePassword(
+      loginDto.password,
+      entity.password,
+    );
+    if (!isPasswordValid) {
+      this.logger.warn(
+        `Login failed: Invalid password for email ${loginDto.email}`,
       );
       throw new UnauthorizedException('Invalid credentials');
     }
 
     this.logger.log(`Login successful for email: ${loginDto.email}`);
-    const payload = { username: entity.username, userId: entity.id };
+    const payload = { userId: entity.id };
     const access_token = this.jwtService.generateAccessToken(payload);
     const refresh_token = this.jwtService.generateRefreshToken(payload);
 
     this.logger.log(`Tokens generated for email: ${loginDto.email}`);
-    return {
-      access_token,
-      refresh_token,
-    };
+    return { access_token, refresh_token };
   }
 
   async refreshAccessToken(refreshToken: string): Promise<Partial<TokenDto>> {
     this.logger.log('Refreshing access token');
+
     try {
       const payload = this.jwtService.refreshToken(refreshToken);
-      const newAccessToken = this.jwtService.generateAccessToken(payload);
+      this.logger.debug(
+        `Payload extracted from refresh token: ${JSON.stringify(payload)}`,
+      );
 
-      this.logger.log(`Access token refreshed for user: ${payload.username}`);
+      const newAccessToken = this.jwtService.generateAccessToken(payload);
+      this.logger.log(`Access token refreshed for userId: ${payload.userId}`);
       return { access_token: newAccessToken };
     } catch (error) {
       this.logger.error('Failed to refresh access token', error.stack);
@@ -108,10 +119,10 @@ export class AuthService {
     }
   }
 
-  async forgotPassword(email: string) :Promise<void> {
+  async forgotPassword(email: string): Promise<void> {
     this.logger.log(`Password reset requested for email: ${email}`);
-    const user = await this.authRepository.getUserByFelid('email', email);
 
+    const user = await this.authRepository.getUserByFelid('email', email);
     if (!user) {
       this.logger.warn(
         `Password reset failed: No user found with email: ${email}`,
@@ -124,8 +135,11 @@ export class AuthService {
       userId: user.id,
     });
 
-    await this.notificationCommunicator.sendEmail({ email, resetToken });
-
+    this.logger.debug(`Generated reset token for userId: ${user.id}`);
+    await this.notificationCommunicator.sendForgotPasswordEmail({
+      email,
+      resetToken,
+    });
     this.logger.log(`Password reset link sent to email: ${email}`);
   }
 
@@ -133,11 +147,13 @@ export class AuthService {
     this.logger.log(
       `Password reset attempt with token for userId: ${resetPasswordDto.token}`,
     );
+
     try {
       const { userId } = this.jwtService.verify(
         resetPasswordDto.token,
         config.getString('RESET_PASSWORD_SECRET'),
       );
+      this.logger.debug(`Reset token verified for userId: ${userId}`);
 
       const user = await this.authRepository.getUserByFelid('id', userId);
       if (!user) {
@@ -150,7 +166,9 @@ export class AuthService {
       user.password = await hashPassword(resetPasswordDto.password);
       await this.authRepository.updateUser(user);
 
-      this.logger.log(`Password reset successful for user: ${user.username}`);
+      this.logger.log(
+        `Password reset successful for user: ${user.username} (ID: ${user.id})`,
+      );
       return { message: 'Password has been reset successfully' };
     } catch (error) {
       this.logger.error(
@@ -163,50 +181,75 @@ export class AuthService {
 
   async deleteAccount(userId: string): Promise<void> {
     this.logger.log(`Deleting account for userId: ${userId}`);
+
     const user = await this.authRepository.getUserByFelid('id', userId);
     if (!user) {
+      this.logger.warn(
+        `Delete account failed: User with id ${userId} not found`,
+      );
       throw new NotFoundException('User not found');
     }
+
     await this.authRepository.deleteUser(userId);
-    this.logger.log(`User account deleted: ${user.username}`);
+    this.logger.log(`User account deleted: ${user.username} (ID: ${user.id})`);
   }
 
   async deactivateAccount(userId: string): Promise<void> {
     this.logger.log(`Deactivating account for userId: ${userId}`);
+
     const user = await this.authRepository.getUserByFelid('id', userId);
     if (!user) {
+      this.logger.warn(
+        `Deactivate account failed: User with id ${userId} not found`,
+      );
       throw new NotFoundException('User not found');
     }
 
     user.isActive = false;
     await this.authRepository.updateUser(user);
-    this.logger.log(`User account deactivated: ${user.username}`);
+    this.logger.log(
+      `User account deactivated: ${user.username} (ID: ${user.id})`,
+    );
   }
 
   async reactivateAccount(userId: string): Promise<void> {
     this.logger.log(`Reactivating account for userId: ${userId}`);
+
     const user = await this.authRepository.getUserByFelid('id', userId);
     if (!user) {
+      this.logger.warn(
+        `Reactivate account failed: User with id ${userId} not found`,
+      );
       throw new NotFoundException('User not found');
     }
 
     if (user.isDeleted) {
+      this.logger.warn(
+        `Reactivate account failed: Account with id ${userId} is deleted`,
+      );
       throw new BadRequestException('Account is deleted, cannot reactivate');
     }
 
     user.isActive = true;
     await this.authRepository.updateUser(user);
-    this.logger.log(`User account reactivated: ${user.username}`);
+    this.logger.log(
+      `User account reactivated: ${user.username} (ID: ${user.id})`,
+    );
   }
 
-  async updateProfile(userId: string, body: Partial<SignupDto>): Promise<void> {
+  async updateProfile(userId: string, body: SignupDto): Promise<void> {
     this.logger.log(`Updating profile for userId: ${userId}`);
+
     const user = await this.authRepository.getUserByFelid('id', userId);
     if (!user) {
+      this.logger.warn(
+        `Update profile failed: User with id ${userId} not found`,
+      );
       throw new NotFoundException('User not found');
     }
+
     Object.assign(user, body);
     await this.authRepository.updateUser(user);
-    this.logger.log(`User profile updated: ${user.username}`);
+    this.logger.log(`User profile updated: ${user.username} (ID: ${user.id})`);
   }
 }
