@@ -3,15 +3,15 @@ import { PassportStrategy } from '@nestjs/passport';
 import { VerifyCallback } from 'passport-google-oauth20';
 import { Strategy } from 'passport-linkedin-oauth2';
 import { Profile } from 'passport-linkedin-oauth2';
+import { config } from 'src/app/shared/module/config-module/config.service';
 
 @Injectable()
-
 export class LinkedInStrategy extends PassportStrategy(Strategy, 'linkedin') {
   constructor() {
     super({
-      clientID: process.env.LINKEDIN_CLIENT_ID,
-      clientSecret: process.env.LINKEDIN_CLIENT_SECRET,
-      callbackURL: 'http://localhost:3000/api/v1/linkedin/callback',
+      clientID: config.getString('LINKEDIN_CLIENT_ID'),
+      clientSecret: config.getString('LINKEDIN_CLIENT_SECRET'),
+      callbackURL: config.getString('LINKEDIN_CALLBACK_URL'),
       scope: ['r_liteprofile', 'r_emailaddress'],
       state: true,
     });
@@ -31,6 +31,7 @@ export class LinkedInStrategy extends PassportStrategy(Strategy, 'linkedin') {
       lastName: name.familyName,
       profilePhoto: photos[0].value,
       accessToken,
+      refreshToken,
     };
     done(null, user);
   }

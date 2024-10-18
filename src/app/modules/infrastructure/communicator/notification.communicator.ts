@@ -16,24 +16,24 @@ export class NotificationCommunicator {
 
   private async sendEmail(
     emailType: 'forgotPassword' | 'completeRegistration',
-    dto: ForgotPasswordDto | CompleteUserDto
+    dto: ForgotPasswordDto | CompleteUserDto,
   ) {
     const url = `${this.configService.getString('NOTIFICATION_SERVICE_URL')}/user-emails/send-email`;
 
-    this.logger.log(`Calling Notification Service: ${url} with email type: ${emailType}`);
+    this.logger.log(
+      `Calling Notification Service: ${url} with email type: ${emailType}`,
+    );
 
     return await firstValueFrom(
-      this.httpService
-        .post(url, { emailType, dto })
-        .pipe(
-          map((res) => res.data),
-          catchError((error) => {
-            this.logger.error(
-              `Error from Notification Service: ${JSON.stringify(error.response?.data)}`,
-            );
-            throw new UnauthorizedException(error.response?.data);
-          }),
-        ),
+      this.httpService.post(url, { emailType, dto }).pipe(
+        map((res) => res.data),
+        catchError((error) => {
+          this.logger.error(
+            `Error from Notification Service: ${JSON.stringify(error.response?.data)}`,
+          );
+          throw new UnauthorizedException(error.response?.data);
+        }),
+      ),
     );
   }
 
