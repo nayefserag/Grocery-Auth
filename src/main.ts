@@ -4,7 +4,7 @@ import { ValidationPipe, VersioningType, Logger } from '@nestjs/common';
 import { config } from './app/shared/module/config-module/config.service';
 import { NotificationCommunicator } from './app/modules/infrastructure/communicator/notification.communicator';
 import { Connector } from './app/rabbitMQ/connector';
-import { RabbitMQConsumer } from './app/rabbitMQ/rabbit-mq-consumer';
+import { RabbitMQConsumer } from './app/rabbitMQ/rabbit-mq-consumer'; 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const globalPrefix = 'api';
