@@ -38,6 +38,6 @@ async function bootstrap() {
     ),
   });
   await app.listen(config.getNumber('PORT'));
-  Logger.log(`🚀 Application is running on: ${await app.getUrl()}`);
+  Logger.log(`🚀 User-Authentication-service is running on: ${await app.getUrl()}`);
 }
 bootstrap();
