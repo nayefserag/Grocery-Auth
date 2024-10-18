@@ -29,7 +29,7 @@ export class AuthController {
       await this.authService.signup(signUpDto);
 
     res.setHeader('Authorization', `Bearer ${access_token}`);
-    res.setHeader('x-refresh-token', refresh_token); // Optionally, set refresh token in header
+    res.setHeader('x-refresh-token', refresh_token);
 
     return res.status(HttpStatus.CREATED).json({
       message: 'User signed up successfully',
@@ -128,4 +128,9 @@ export class AuthController {
   async completeRegistration(@Body() body: SignupDto, @Param('id') id: string) {
     return this.authService.updateProfile(body.id, body);
   }
+
+  @Get("/debug-sentry")
+getError() {
+  throw new Error("My first Sentry error!");
+}
 }
