@@ -18,6 +18,7 @@ import { JwtService } from '@nestjs/jwt';
 import { LinkedInController } from './social-auth/controller/linkedin.controller';
 import { XController } from './social-auth/controller/x.controller';
 import { OAuthService } from '../application/social-auth/gmail/services/OAuth.service';
+import { RabbitMQModule } from 'src/app/rabbitMQ/rabbit-mq.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { OAuthService } from '../application/social-auth/gmail/services/OAuth.se
     DatabaseModule,
     TypeOrmModule.forFeature([UserEntity]),
     HttpModule,
+    RabbitMQModule
   ],
   controllers: [
     AuthController,
