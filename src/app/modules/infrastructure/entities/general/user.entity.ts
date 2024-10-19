@@ -50,4 +50,13 @@ export class UserEntity {
 
   @Column({ name: 'provider', type: 'varchar', length: 255, nullable: true })
   provider: string;
+
+  @Column({ name: 'otp', type: 'varchar', length: 255, nullable: true })
+  otp: string;
+
+  @Column({ name: 'expiry_date', type: 'timestamp', nullable: true })
+  otpExpiresAt: Date;
+
+  @Column({ name: 'is_verified', type: 'boolean' })
+  isEmailVerified: boolean;
 }

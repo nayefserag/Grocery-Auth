@@ -10,6 +10,7 @@ import {
   comparePassword,
   hashPassword,
 } from 'src/app/shared/utils/hash.helper';
+import { generateOtp  } from 'src/app/shared/utils/generator.helper';
 import { v4 as uuidv4 } from 'uuid';
 import { AuthRepository } from 'src/app/modules/infrastructure/repositories/auth/auth.repository';
 import { TokenService } from 'src/app/modules/strategies/jwt/jwt.service';
@@ -19,7 +20,7 @@ import { NotificationCommunicator } from 'src/app/modules/infrastructure/communi
 import { ResetPasswordDto } from '../model/reset-password.dto';
 import { SignupDto } from '../model/signup.dto';
 import { TokenDto } from '../model/token.dto';
-
+import { RabbitMQPublisher } from 'src/app/rabbitMQ/rabbit-mq-publisher';
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
@@ -28,6 +29,7 @@ export class AuthService {
     private readonly jwtService: TokenService,
     private readonly authRepository: AuthRepository,
     private readonly notificationCommunicator: NotificationCommunicator,
+    private readonly rabbitMQPublisher: RabbitMQPublisher,
   ) {
     this.logger.log('AuthService initialized');
   }
@@ -251,5 +253,45 @@ export class AuthService {
     Object.assign(user, body);
     await this.authRepository.updateUser(user);
     this.logger.log(`User profile updated: ${user.username} (ID: ${user.id})`);
+  }
+
+  async sendVerificationEmail(email: string): Promise<void> {
+    this.logger.log(`Sending verification email for: ${email}`);
+    const user = await this.authRepository.getUserByFelid('email', email);
+    if (!user) {
+      this.logger.warn(`Verification email failed: No user found with email: ${email}`);
+      throw new NotFoundException('User not found');
+    }
+    const { otp , expiresAt } = generateOtp();
+    user.otp = otp;
+    user.otpExpiresAt = expiresAt;
+    await this.authRepository.updateUser(user);
+    console.log(email,otp)
+    this.rabbitMQPublisher.publishToQueue({email: email, otp: otp},{name :config.getString('EMAIL_VERIFICATION_QUEUE')})
+  }
+  async verifyEmail(otp: string, userId: string): Promise<void> {
+    const user = await this.authRepository.getUserByFelid('id', userId);
+    if (!user) {
+      this.logger.warn(
+        `Verification email failed: User with id ${userId} not found`,
+      );
+      throw new NotFoundException('User not found');
+    }
+
+    if (user.otp !== otp) {
+      this.logger.warn(`Verification email failed: Invalid OTP`);
+      throw new BadRequestException('Invalid OTP');
+    }
+
+    if (user.otpExpiresAt < new Date()) {
+      this.logger.warn(`Verification email failed: OTP expired`);
+      throw new BadRequestException('OTP expired');
+    }
+    user.isEmailVerified = true;
+    user.otp = null;
+    user.otpExpiresAt = null;
+    await this.authRepository.updateUser(user);
+
+    this.logger.log(`Email verified successfully`);
   }
 }

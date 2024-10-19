@@ -129,8 +129,21 @@ export class AuthController {
     return this.authService.updateProfile(body.id, body);
   }
 
-  @Get("/debug-sentry")
-getError() {
-  throw new Error("My first Sentry error!");
-}
+  @Post('send-verification-email')
+  @HttpCode(HttpStatus.OK)
+  async sendVerificationEmail(@Body('email') email: string) {
+    await this.authService.sendVerificationEmail(email);
+    return {
+      message: 'Verification email sent. Please check your email for the OTP.',
+    };
+  }
+
+  @Post('verify-email')
+  @HttpCode(HttpStatus.OK)
+  async verifyEmail(@Body('otp') otp: string, @Body('id') id: string) {
+    await this.authService.verifyEmail(id, otp);
+    return {
+      message: 'Email verified successfully',
+    };
+  }
 }
