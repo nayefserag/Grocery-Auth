@@ -266,7 +266,6 @@ export class AuthService {
     user.otp = otp;
     user.otpExpiresAt = expiresAt;
     await this.authRepository.updateUser(user);
-    console.log(email,otp)
     this.rabbitMQPublisher.publishToQueue({email: email, otp: otp},{name :config.getString('EMAIL_VERIFICATION_QUEUE')})
   }
   async verifyEmail(otp: string, userId: string): Promise<void> {

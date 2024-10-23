@@ -4,30 +4,24 @@ import { config } from 'src/app/shared/module/config-module/config.service';
 
 @Injectable()
 export class TokenService {
-  private readonly accessTokenSecret: string;
-  private readonly refreshTokenSecret: string;
-  private readonly resetPasswordTokenSecret: string;
 
   constructor(private readonly jwtService: JwtService) {
-    this.accessTokenSecret = config.getString('JWT_SECRET');
-    this.refreshTokenSecret = config.getString('JWT_SECRET_REFRESH');
-    this.resetPasswordTokenSecret = config.getString('JWT_SECRET');
   }
 
   // Generate access token
   generateAccessToken(payload: any) {
-    return this.generateToken(payload, this.accessTokenSecret, '15m');
+    return this.generateToken(payload, config.getString('JWT_SECRET'), '15m');
   }
 
   // Generate refresh token
   generateRefreshToken(payload: any) {
-    return this.generateToken(payload, this.refreshTokenSecret, '7d');
+    return this.generateToken(payload, config.getString('JWT_SECRET_REFRESH'), '7d');
   }
 
   // Refresh token logic
   refreshToken(refreshToken: string) {
     try {
-      this.jwtService.verify(refreshToken, { secret: this.refreshTokenSecret });
+      this.jwtService.verify(refreshToken, { secret: config.getString('JWT_SECRET_REFRESH') });
       return this.jwtService.decode(refreshToken);
     } catch (error) {
       throw new UnauthorizedException('Invalid or expired refresh token');
@@ -36,7 +30,7 @@ export class TokenService {
 
   // Generate reset password token
   resetPasswordToken(payload: any) {
-    return this.generateToken(payload, this.resetPasswordTokenSecret, '5m');
+    return this.generateToken(payload, config.getString('JWT_SECRET'), '5m');
   }
 
   // Verify token with dynamic secret

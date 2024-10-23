@@ -11,16 +11,22 @@ import {
   Delete,
   Patch,
   Param,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { LoginDto } from 'src/app/modules/application/auth/model/login.dto';
 import { ResetPasswordDto } from 'src/app/modules/application/auth/model/reset-password.dto';
 import { SignupDto } from 'src/app/modules/application/auth/model/signup.dto';
 import { AuthService } from 'src/app/modules/application/auth/services/auth.service';
 import { JwtAuthGuard } from 'src/app/modules/strategies/jwt/jwt.guard';
+import { TokenService } from 'src/app/modules/strategies/jwt/jwt.service';
+import { config } from 'src/app/shared/module/config-module/config.service';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly tokenService: TokenService,
+  ) {}
 
   @Post('signup')
   @HttpCode(HttpStatus.CREATED)
@@ -145,5 +151,19 @@ export class AuthController {
     return {
       message: 'Email verified successfully',
     };
+  }
+
+  @Post('validate-token')
+  async validateToken(@Body('token') token: string) {
+    try {
+      console.log('token', token);
+      const user = await this.tokenService.verify(
+        token,
+        config.getString('JWT_SECRET'),
+      );
+      return { isValid: true, user };
+    } catch (e) {
+      throw new UnauthorizedException('Invalid or expired token');
+    }
   }
 }
