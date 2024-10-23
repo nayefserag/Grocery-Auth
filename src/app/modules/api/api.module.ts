@@ -11,7 +11,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserEntity } from '../infrastructure/entities/general/user.entity';
 import { DatabaseModule } from '../database/database.module';
 import { ConfigService } from 'src/app/shared/module/config-module/config.service';
-import { HttpModule, HttpService } from '@nestjs/axios';
+import { HttpModule } from '@nestjs/axios';
 import { AuthService } from '../application/auth/services/auth.service';
 import { TokenService } from '../strategies/jwt/jwt.service';
 import { JwtService } from '@nestjs/jwt';
