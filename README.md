@@ -1,8 +1,12 @@
 ### Part Of Microservice Grocery App
 
 ---
-
-# Grocery Auth Service
+<h1 align="center">Grocery Auth Service</h1>
+<p align="center">
+  <a href="http://nestjs.com/" target="blank">
+    <img src="logo.jpg" width="500" alt="Nest Logo" style="border-radius: 15px;" />
+  </a>
+</p>
 
 This service is a part of a microservices-based architecture responsible for handling user authentication and authorization. It provides various endpoints for user sign-up, login, password resets, social login integrations, and more. Additionally, it integrates with a notification service to send emails for actions like password reset and account verification.
 
