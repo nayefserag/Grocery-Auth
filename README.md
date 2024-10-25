@@ -2,7 +2,7 @@
 
 ---
 
-# User Auth Service
+# Grocery Auth Service
 
 This service is a part of a microservices-based architecture responsible for handling user authentication and authorization. It provides various endpoints for user sign-up, login, password resets, social login integrations, and more. Additionally, it integrates with a notification service to send emails for actions like password reset and account verification.
 
@@ -39,20 +39,119 @@ This service is a part of a microservices-based architecture responsible for han
 ### File Structure
 
 ```plaintext
-src/
-├── app/
-│   ├── api/
-│   │   ├── auth/                  # Handles user authentication and JWT management
-│   │   ├── social-auth/           # Handles OAuth with various providers (GitHub, Google, LinkedIn, etc.)
-│   ├── application/
-│   │   ├── auth/
-│   │   ├── services/              # Business logic for handling authentication flows and user data management
-│   ├── shared/
-│   │   ├── module/
-│   │   └── notification/
-├── database/                      # Database migration files and configuration
-├── infrastructure/                # Communication and RabbitMQ configuration
-└── strategies/                    # Different strategies like JWT, Google, GitHub, etc., for authentication
+.
+|-- README.md        
+|-- combined.log     
+|-- debug.log        
+|-- error.log        
+|-- nest-cli.json    
+|-- package-lock.json
+|-- package.json
+|-- postman-collection
+|   `-- postman-collection-v1.json
+|-- src
+|   |-- app
+|   |   |-- modules
+|   |   |   |                               `-- api
+|   |   |   |   |                           `-- api.module.ts
+|   |   |   |   |                           `-- auth
+|   |   |   |   |   |                       `-- auth.module.ts
+|   |   |   |   |                           `-- controller
+|   |   |   |   |                           `-- auth.controller.ts
+|   |   |   |   `-- social-auth
+|   |   |   |       |-- controller
+|   |   |   |       |   |                   `-- github.controller.ts
+|   |   |   |       |   |                   `-- gmail.controller.ts
+|   |   |   |       |   |                   `-- linkedin.controller.ts
+|   |   |   |       |                       `-- x.controller.ts
+|   |   |   |       `-- social-login.module.ts
+|   |   |   |-- application
+|   |   |   |   |-- application.module.ts
+|   |   |   |   |-- auth
+|   |   |   |   |   |-- model
+|   |   |   |   |   |   |                   `-- forget-password.dto.ts
+|   |   |   |   |   |   |                   `-- login.dto.ts
+|   |   |   |   |   |   |                   `-- o-auth.dto.ts
+|   |   |   |   |   |   |                   `-- reset-password.dto.ts
+|   |   |   |   |   |   |                   `-- signup.dto.ts
+|   |   |   |   |   |                       `-- token.dto.ts
+|   |   |   |   |   `-- services
+|   |   |   |   |                           `-- auth.service.ts
+|   |   |   |   |-- shared
+|   |   |   |   `-- social-auth
+|   |   |   |       `-- gmail
+|   |   |   |           |                   `-- model
+|   |   |   |           |                   `-- complete-user.dto.ts
+|   |   |   |           `-- services
+|   |   |   |                               `-- OAuth.service.ts
+|   |   |   |-- database
+|   |   |   |   |-- data-source.ts
+|   |   |   |   |-- database.module.ts
+|   |   |   |   `-- migrations
+|   |   |   |       |-- 1729158705025-addUsersTable.ts
+|   |   |   |       |-- 1729162035465-addIsActiveColumnToUsers.ts
+|   |   |   |       |-- 1729176139822-addRefreshTookenAndStratgyKeyToUsersTable.ts
+|   |   |   |       |-- 1729178691817-addIsCompletedToUserTable.ts
+|   |   |   |       |-- 1729179326815-addProviderToUsersTable.ts
+|   |   |   |       |-- 1729179555682-modifySchemaForUserTable.ts
+|   |   |   |       |-- 1729179784097-modifySchemaForUserTable.ts
+|   |   |   |       |-- 1729179900659-modifySchemaForUserTable.ts
+|   |   |   |       |-- 1729181791971-modifySchemaForUserTable.ts
+|   |   |   |       |-- 1729340456197-addOtpAndExpiryDateToUsersTable.ts
+|   |   |   |       `-- 1729340786105-addIsVerifedColumnToUsersTable.ts
+|   |   |   |-- infrastructure
+|   |   |   |   |-- communicator
+|   |   |   |   |   |-- communicator.module.ts
+|   |   |   |   |   `-- notification.communicator.ts
+|   |   |   |   |-- entities
+|   |   |   |   |   `-- general
+|   |   |   |   |       `-- user.entity.ts
+|   |   |   |   |-- infrastructure.module.ts
+|   |   |   |   |-- repositories
+|   |   |   |   |   `-- auth
+|   |   |   |   |       `-- auth.repository.ts
+|   |   |   |   `-- sentry
+|   |   |   |       `-- instrument.ts
+|   |   |   `-- strategies
+|   |   |       |-- X
+|   |   |       |   `-- x.strategy.ts
+|   |   |       |-- github
+|   |   |       |   `-- github.strategy.ts
+|   |   |       |-- gmail
+|   |   |       |   `-- google.stratgy.ts
+|   |   |       |-- jwt
+|   |   |       |   |-- jwt.guard.ts
+|   |   |       |   |-- jwt.service.ts
+|   |   |       |   `-- jwt.strategy.ts
+|   |   |       `-- linkedin
+|   |   |           `-- linkedin.strategy.ts
+|   |   |-- rabbitMQ
+|   |   |   |-- connector.ts
+|   |   |   |-- consumer-options.ts
+|   |   |   |-- exchange.definition.ts
+|   |   |   |-- queue-consumer.decorator.ts
+|   |   |   |-- queue.difinition.ts
+|   |   |   |-- rabbit-mq-consumer.ts
+|   |   |   |-- rabbit-mq-publisher.ts
+|   |   |   `-- rabbit-mq.module.ts
+|   |   `-- shared
+|   |       |-- interfaces
+|   |       |   `-- IEnvConfigInterface.ts
+|   |       |-- module
+|   |       |   `-- config-module
+|   |       |       |-- config.module.ts
+|   |       |       `-- config.service.ts
+|   |       `-- utils
+|   |           |-- generator.helper.ts
+|   |           `-- hash.helper.ts
+|   |-- app.module.ts
+|   `-- main.ts
+|-- test
+|   |-- app.e2e-spec.ts
+|   `-- jest-e2e.json
+|-- tsconfig.build.json
+|-- tsconfig.json
+`-- warn.log
 ```
 
 ### Authentication Flow
